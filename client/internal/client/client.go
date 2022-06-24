@@ -8,7 +8,7 @@ import (
 )
 
 type Client struct {
-	ApiUrl     *url.URL
+	ApiUrl     string
 	HttpClient http.Client
 }
 
@@ -19,15 +19,16 @@ func NewClient() *Client {
 	}
 }
 
-func getApiUrlFromEnv() *url.URL {
+func getApiUrlFromEnv() string {
 	const API_URL_ENV_VAR_NAME = "API_URL"
+	apiUrl := os.Getenv(API_URL_ENV_VAR_NAME)
+	validateUrl(apiUrl)
+	return apiUrl
+}
 
-	urlFromEnv := os.Getenv(API_URL_ENV_VAR_NAME)
-	apiUrl, err := url.Parse(urlFromEnv)
-
+func validateUrl(urlFromEnv string) {
+	_, err := url.Parse(urlFromEnv)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	return apiUrl
 }
