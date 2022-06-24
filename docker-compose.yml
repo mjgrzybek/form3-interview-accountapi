@@ -1,6 +1,11 @@
 version: '3'
 
 services:
+  form3-accountapi-client-test:
+    image: form3-accountapi-client-test:latest
+    restart: "no"
+    depends_on:
+      - accountapi
   accountapi:
     image: form3tech/interview-accountapi:v1.0.0-46-gb3b6c766
     restart: on-failure
