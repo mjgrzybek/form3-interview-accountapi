@@ -6,6 +6,8 @@ services:
     restart: "no"
     depends_on:
       - accountapi
+    environment:
+      API_URL: "http://accountapi:8080/v1"
   accountapi:
     image: form3tech/interview-accountapi:v1.0.0-46-gb3b6c766
     restart: on-failure
