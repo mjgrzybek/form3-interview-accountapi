@@ -1,9 +1,10 @@
 package client
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestFoo(t *testing.T) {
-	t.Run("sample test", func(t *testing.T) {
-		Foo()
+	t.Run("sample unit test", func(t *testing.T) {
 	})
 }
