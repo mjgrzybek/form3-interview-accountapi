@@ -34,10 +34,8 @@ func TestAccountApi_Delete(t *testing.T) {
 		svc := client.NewAccountsApiService()
 
 		accountData := RequestsData["delete"]
-		httpResponse, err := svc.Delete(accountData)
-
+		err := svc.Delete(accountData)
 		assert.NoError(t, err)
-		assert.Equal(t, http.StatusNoContent, httpResponse.StatusCode)
 	})
 }
 

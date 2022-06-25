@@ -45,35 +45,55 @@ func (svc AccountsApiService) Fetch() error {
 	return nil
 }
 
-func (svc AccountsApiService) Delete(data *models.AccountData) (*http.Response, error) {
+func (svc AccountsApiService) Delete(data *models.AccountData) error {
 	url, err := url.Parse(svc.path() + "/" + data.ID)
 	if err != nil {
-		return nil, err
-	}
-	values := url.Query()
-	if data.Version != nil {
-		values.Add("version", strconv.FormatInt(*data.Version, 10))
+		return err
 	}
 
-	url.RawQuery = values.Encode()
-
-	req, err := http.NewRequest("DELETE", url.String(), bytes.NewReader(nil))
+	err = setParams(url, data)
 	if err != nil {
-		return nil, err
+		return err
 	}
+
+	req, err := http.NewRequest(http.MethodDelete, url.String(), bytes.NewReader(nil))
+	if err != nil {
+		return err
+	}
+
 	httpResponse, err := svc.HttpClient.Do(req)
 	if err != nil {
-		return httpResponse, err
-	}
-	if httpResponse.StatusCode == http.StatusNoContent {
-		return httpResponse, nil
+		return err
 	}
 
+	if httpResponse.StatusCode == http.StatusNoContent {
+		// success
+		return nil
+	}
+
+	return svc.handleError(err, httpResponse)
+}
+
+func setParams(url *url.URL, data *models.AccountData) error {
+	if data.Version == nil {
+		return errors.New("data.Version cannot be nil")
+	}
+	setParam(url, "version", strconv.FormatInt(*data.Version, 10))
+	return nil
+}
+
+func setParam(url *url.URL, key, value string) {
+	values := url.Query()
+	values.Set(key, value)
+	url.RawQuery = values.Encode()
+}
+
+func (svc AccountsApiService) handleError(err error, httpResponse *http.Response) error {
 	var errorResponse models.ErrorResponse
 	err = json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
 	if err != nil {
-		return httpResponse, err
+		return err
 	}
 
-	return httpResponse, errors.New(errorResponse.ErrorMessage)
+	return errors.New(errorResponse.ErrorMessage)
 }
