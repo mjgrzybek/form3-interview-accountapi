@@ -24,7 +24,7 @@ func NewClient() *Client {
 func getApiUrlFromEnv() string {
 	apiUrl, ok := os.LookupEnv(ApiUrlEnvVarName)
 	if !ok {
-		log.Fatalf(`Environemnt variable "%s" not set`, ApiUrlEnvVarName)
+		log.Fatalf(`Environment variable "%s" not set`, ApiUrlEnvVarName)
 	}
 	validateUrl(apiUrl)
 	return apiUrl

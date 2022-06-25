@@ -37,7 +37,10 @@ func (svc AccountsApiService) Create(accountData *models.AccountData) (*models.A
 	if httpResponse.StatusCode >= http.StatusBadRequest {
 		var errorResponse models.ErrorResponse
 		err = json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
-		return nil, err
+		if err != nil {
+			return nil, err
+		}
+		return nil, errorResponse
 	}
 
 	var accountDataResponse models.AccountDataResponse
