@@ -10,7 +10,7 @@ import (
 const ApiUrlEnvVarName = "API_URL"
 
 type Client struct {
-	ApiUrl     string
+	ApiUrl     *url.URL
 	HttpClient http.Client
 }
 
@@ -21,18 +21,16 @@ func NewClient() *Client {
 	}
 }
 
-func getApiUrlFromEnv() string {
-	apiUrl, ok := os.LookupEnv(ApiUrlEnvVarName)
+func getApiUrlFromEnv() *url.URL {
+	apiUrlEnvVarValue, ok := os.LookupEnv(ApiUrlEnvVarName)
 	if !ok {
 		log.Fatalf(`Environment variable "%s" not set`, ApiUrlEnvVarName)
 	}
-	validateUrl(apiUrl)
-	return apiUrl
-}
 
-func validateUrl(urlFromEnv string) {
-	_, err := url.Parse(urlFromEnv)
+	apiUrl, err := url.Parse(apiUrlEnvVarValue)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	return apiUrl
 }

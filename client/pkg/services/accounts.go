@@ -15,26 +15,46 @@ import (
 
 type AccountsApiService internal.Client
 
-func (svc AccountsApiService) path() string {
-	return svc.ApiUrl + "/" + path.Join("organisation", "accounts") // TODO: make it smarter
-}
+func NewAccountsApiService() (*AccountsApiService, error) {
+	svc := (*AccountsApiService)(internal.NewClient())
 
-func NewAccountsApiService() *AccountsApiService {
-	return (*AccountsApiService)(internal.NewClient())
+	parsedUrl, err := url.Parse(svc.ApiUrl.String() + path.Join("/", "organisation", "accounts")) // TODO: make it smarter
+	if err != nil {
+		return nil, err
+	}
+	svc.ApiUrl = parsedUrl
+
+	return svc, nil
 }
 
 func (svc AccountsApiService) Create(accountData *models.AccountData) (*models.AccountData, error) {
+	url := svc.ApiUrl
+	err := validateCreate(url, accountData)
+	if err != nil {
+		return nil, err
+	}
+
 	buffer, err := encode(models.AccountDataRequest{Data: accountData})
 	if err != nil {
 		return nil, err
 	}
 
-	httpResponse, err := svc.HttpClient.Post(svc.path(), "application/vnd.api+json", buffer)
+	httpResponse, err := svc.HttpClient.Post(url.String(), "application/vnd.api+json", buffer)
 	if err != nil {
 		return nil, err
 	}
 
 	return svc.handleResponse(httpResponse, err)
+}
+
+func validateCreate(*url.URL, *models.AccountData) error {
+	return nil
+}
+func validateFetch(*url.URL) error {
+	return nil
+}
+func validateDelete(*url.URL, *models.AccountData) error {
+	return nil
 }
 
 func (svc AccountsApiService) handleResponse(httpResponse *http.Response, err error) (*models.AccountData, error) {
@@ -62,7 +82,12 @@ func encode(data any) (*bytes.Buffer, error) {
 }
 
 func (svc AccountsApiService) Fetch(data *models.AccountData) (*models.AccountData, error) {
-	url, err := url.Parse(svc.path() + "/" + data.ID)
+	url, err := url.Parse(svc.ApiUrl.String() + "/" + data.ID) // TODO: make it smarter
+	if err != nil {
+		return nil, err
+	}
+
+	err = validateFetch(url)
 	if err != nil {
 		return nil, err
 	}
@@ -76,12 +101,17 @@ func (svc AccountsApiService) Fetch(data *models.AccountData) (*models.AccountDa
 }
 
 func (svc AccountsApiService) Delete(data *models.AccountData) error {
-	url, err := url.Parse(svc.path() + "/" + data.ID)
+	url, err := url.Parse(svc.ApiUrl.String() + "/" + data.ID) // TODO: make it smarter
 	if err != nil {
 		return err
 	}
 
 	err = setParams(url, data)
+	if err != nil {
+		return err
+	}
+
+	err = validateDelete(url, data)
 	if err != nil {
 		return err
 	}

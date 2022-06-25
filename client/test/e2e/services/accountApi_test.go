@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/mjgrzybek/form3-interview-accountapi/client/pkg/models"
 	"github.com/stretchr/testify/assert"
 
 	client "github.com/mjgrzybek/form3-interview-accountapi/client/pkg/services"
@@ -13,7 +14,8 @@ import (
 
 func TestAccountApi_Create(t *testing.T) {
 	t.Run("create unique entry", func(t *testing.T) {
-		svc := client.NewAccountsApiService()
+		svc, err := client.NewAccountsApiService()
+		assert.NoError(t, err)
 
 		accountRequestData := RequestsData["create"]
 		accountResponseData, err := svc.Create(accountRequestData)
@@ -22,7 +24,8 @@ func TestAccountApi_Create(t *testing.T) {
 		assert.NoError(t, err)
 	})
 	t.Run("create entry already existing", func(t *testing.T) {
-		svc := client.NewAccountsApiService()
+		svc, err := client.NewAccountsApiService()
+		assert.NoError(t, err)
 
 		accountRequestData := RequestsData["create"]
 		accountResponseData, err := svc.Create(accountRequestData)
@@ -34,7 +37,8 @@ func TestAccountApi_Create(t *testing.T) {
 
 func TestAccountApi_Fetch(t *testing.T) {
 	t.Run("fetch existing entry", func(t *testing.T) {
-		svc := client.NewAccountsApiService()
+		svc, err := client.NewAccountsApiService()
+		assert.NoError(t, err)
 
 		accountRequestData := RequestsData["fetch"]
 		accountResponseData, err := svc.Fetch(accountRequestData)
@@ -42,14 +46,11 @@ func TestAccountApi_Fetch(t *testing.T) {
 		assert.NoError(t, err)
 	})
 	t.Run("fetch non-existing entry", func(t *testing.T) {
-		svc := client.NewAccountsApiService()
+		svc, err := client.NewAccountsApiService()
+		assert.NoError(t, err)
 
 		accountRequestData := RequestsData["fetch"]
-		uuid, err := uuid.NewUUID()
-		if err != nil {
-			t.Skipf("Unable to create new UUID %v", err)
-		}
-		accountRequestData.ID = uuid.String()
+		err = setRandomUuid(t, accountRequestData)
 
 		accountResponseData, err := svc.Fetch(accountRequestData)
 
@@ -58,12 +59,22 @@ func TestAccountApi_Fetch(t *testing.T) {
 	})
 }
 
+func setRandomUuid(t *testing.T, accountRequestData *models.AccountData) error {
+	uuid, err := uuid.NewUUID()
+	if err != nil {
+		t.Skipf("Unable to create new UUID %v", err)
+	}
+	accountRequestData.ID = uuid.String()
+	return err
+}
+
 func TestAccountApi_Delete(t *testing.T) {
 	t.Run("", func(t *testing.T) {
-		svc := client.NewAccountsApiService()
+		svc, err := client.NewAccountsApiService()
+		assert.NoError(t, err)
 
 		accountRequestData := RequestsData["delete"]
-		err := svc.Delete(accountRequestData)
+		err = svc.Delete(accountRequestData)
 		assert.NoError(t, err)
 	})
 }
