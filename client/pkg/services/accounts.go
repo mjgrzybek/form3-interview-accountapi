@@ -139,7 +139,7 @@ func (svc AccountsApiService) handleError(err error, httpResponse *http.Response
 
 func setParams(url *url.URL, data *models.AccountData) error {
 	if data.Version == nil {
-		return errors.New("data.Version cannot be nil")
+		return errors.New("version cannot be nil")
 	}
 	utils.SetParam(url, "version", strconv.FormatInt(*data.Version, 10))
 	return nil

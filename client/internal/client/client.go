@@ -17,7 +17,7 @@ type Client struct {
 func NewClient() *Client {
 	return &Client{
 		ApiUrl:     getApiUrlFromEnv(),
-		HttpClient: http.Client{}, // TODO: think about params that may be needed in prod
+		HttpClient: http.Client{},
 	}
 }
 
