@@ -23,13 +23,29 @@ func NewAccountsApiService() *AccountsApiService {
 	return (*AccountsApiService)(internal.NewClient())
 }
 
-func (svc AccountsApiService) Create(accountData *models.AccountData) (*http.Response, error) {
+func (svc AccountsApiService) Create(accountData *models.AccountData) (*models.AccountData, error) {
 	buffer, err := encode(models.AccountDataRequest{Data: accountData})
 	if err != nil {
 		return nil, err
 	}
 
-	return svc.HttpClient.Post(svc.path(), "application/vnd.api+json", buffer)
+	httpResponse, err := svc.HttpClient.Post(svc.path(), "application/vnd.api+json", buffer)
+	if err != nil {
+		return nil, err
+	}
+
+	if httpResponse.StatusCode >= http.StatusBadRequest {
+		var errorResponse models.ErrorResponse
+		err = json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
+		return nil, err
+	}
+
+	var accountDataResponse models.AccountDataResponse
+	err = json.NewDecoder(httpResponse.Body).Decode(&accountDataResponse)
+	if err != nil {
+		return nil, err
+	}
+	return accountDataResponse.Data, nil
 }
 
 func encode(data any) (*bytes.Buffer, error) {
