@@ -3,7 +3,9 @@
 package services
 
 import (
+	"encoding/json"
 	"io"
+	"net/http"
 	"testing"
 
 	"github.com/mjgrzybek/form3-interview-accountapi/client/pkg/models"
@@ -16,38 +18,35 @@ func TestAccountApi_Create(t *testing.T) {
 	t.Run("", func(t *testing.T) {
 		svc := client.NewAccountsApiService()
 
-		accountData := models.AccountDataRequest{
-			Data: &models.AccountData{
-				Attributes: &models.AccountAttributes{
-					AccountClassification:   nil,
-					AccountMatchingOptOut:   nil,
-					AccountNumber:           "",
-					AlternativeNames:        nil,
-					BankID:                  "",
-					BankIDCode:              "",
-					BaseCurrency:            "",
-					Bic:                     "",
-					Country:                 nil,
-					Iban:                    "",
-					JointAccount:            nil,
-					Name:                    nil,
-					SecondaryIdentification: "",
-					Status:                  nil,
-					Switched:                nil,
-				},
-				ID:             "ad27e265-9605-4b4b-a0e5-3003ea9cc4dc",
-				OrganisationID: "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c",
-				Type:           "accounts",
-			},
-		}
-		response, err := svc.Create(accountData)
+		accountData := RequestsData["create"]
+		httpResponse, err := svc.Create(accountData)
+		assert.Equal(t, http.StatusCreated, httpResponse.StatusCode)
 
-		t.Log(response.StatusCode, reader2str(response.Body))
+		var response models.AccountDataResponse
+		json.Unmarshal(reader2bytes(httpResponse.Body), &response)
+		assert.Equal(t, ResponsesData["create"], response.Data)
 		assert.NoError(t, err)
+	})
+}
+
+func TestAccountApi_Delete(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		svc := client.NewAccountsApiService()
+
+		accountData := RequestsData["delete"]
+		httpResponse, err := svc.Delete(accountData)
+
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusNoContent, httpResponse.StatusCode)
 	})
 }
 
 func reader2str(reader io.Reader) string {
 	all, _ := io.ReadAll(reader)
 	return string(all)
+}
+
+func reader2bytes(reader io.Reader) []byte {
+	all, _ := io.ReadAll(reader)
+	return all
 }
