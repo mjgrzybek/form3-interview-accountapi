@@ -34,19 +34,20 @@ func (svc AccountsApiService) Create(accountData *models.AccountData) (*models.A
 		return nil, err
 	}
 
+	return svc.handleResponse(httpResponse, err)
+}
+
+func (svc AccountsApiService) handleResponse(httpResponse *http.Response, err error) (*models.AccountData, error) {
 	if httpResponse.StatusCode >= http.StatusBadRequest {
-		var errorResponse models.ErrorResponse
-		err = json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
-		if err != nil {
-			return nil, err
-		}
-		return nil, errorResponse
+		return nil, svc.handleError(err, httpResponse)
 	}
 
 	var accountDataResponse models.AccountDataResponse
-	err = json.NewDecoder(httpResponse.Body).Decode(&accountDataResponse)
-	if err != nil {
-		return nil, err
+	if httpResponse.Body != http.NoBody {
+		err = json.NewDecoder(httpResponse.Body).Decode(&accountDataResponse)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return accountDataResponse.Data, nil
 }
@@ -71,18 +72,7 @@ func (svc AccountsApiService) Fetch(data *models.AccountData) (*models.AccountDa
 		return nil, err
 	}
 
-	if httpResponse.StatusCode >= http.StatusBadRequest {
-		var errorResponse models.ErrorResponse
-		err = json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
-		return nil, err
-	}
-
-	var accountDataResponse models.AccountDataResponse
-	err = json.NewDecoder(httpResponse.Body).Decode(&accountDataResponse)
-	if err != nil {
-		return nil, err
-	}
-	return accountDataResponse.Data, nil
+	return svc.handleResponse(httpResponse, err)
 }
 
 func (svc AccountsApiService) Delete(data *models.AccountData) error {
@@ -106,12 +96,8 @@ func (svc AccountsApiService) Delete(data *models.AccountData) error {
 		return err
 	}
 
-	if httpResponse.StatusCode == http.StatusNoContent {
-		// success
-		return nil
-	}
-
-	return svc.handleError(err, httpResponse)
+	_, err = svc.handleResponse(httpResponse, err)
+	return err
 }
 
 func setParams(url *url.URL, data *models.AccountData) error {

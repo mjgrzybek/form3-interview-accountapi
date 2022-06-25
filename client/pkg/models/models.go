@@ -45,9 +45,3 @@ type AccountDataResponse struct {
 type ErrorResponse struct {
 	ErrorMessage string `json:"error_message,omitempty"`
 }
-
-func (e ErrorResponse) Error() string {
-	return e.ErrorMessage
-}
-
-var _ error = (*ErrorResponse)(nil)
