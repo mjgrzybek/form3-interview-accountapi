@@ -15,7 +15,7 @@ type AccountAttributes struct {
 	AccountClassification   *string  `json:"account_classification,omitempty"`
 	AccountMatchingOptOut   *bool    `json:"account_matching_opt_out,omitempty"`
 	AccountNumber           string   `json:"account_number,omitempty"`
-	AlternativeNames        []string `json:"alternative_names,omitempty"`
+	AlternativeNames        []string `json:"alternative_names,omitempty"` // array [3] of string [140]
 	BankID                  string   `json:"bank_id,omitempty"`
 	BankIDCode              string   `json:"bank_id_code,omitempty"`
 	BaseCurrency            string   `json:"base_currency,omitempty"`
@@ -25,8 +25,14 @@ type AccountAttributes struct {
 	JointAccount            *bool    `json:"joint_account,omitempty"`
 	Name                    []string `json:"name,omitempty"`
 	SecondaryIdentification string   `json:"secondary_identification,omitempty"`
+	NameMatchingStatus      string   `json:"name_matching_status,omitempty"` // added
 	Status                  *string  `json:"status,omitempty"`
+	StatusReason            string   `json:"status_reason,omitempty"` // added
 	Switched                *bool    `json:"switched,omitempty"`
+	UserDefinedData         string   `json:"user_defined_data,omitempty"`    /// added
+	ValidationType          string   `json:"validation_type,omitempty"`      // added
+	ReferenceMask           string   `json:"reference_mask,omitempty"`       // added
+	AcceptanceQualifier     string   `json:"acceptance_qualifier,omitempty"` // added
 }
 
 type AccountDataRequest struct {
