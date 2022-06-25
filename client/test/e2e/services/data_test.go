@@ -25,6 +25,9 @@ var RequestsData = map[string]*models.AccountData{
 			AlternativeNames:    []string{"Sam Holder"},
 		},
 	},
+	"fetch": {
+		ID: "ad27e265-9605-4b4b-a0e5-3003ea9cc4dc",
+	},
 	"delete": {
 		ID:      "ad27e265-9605-4b4b-a0e5-3003ea9cc4dc",
 		Version: address.Of[int64](0),
@@ -33,6 +36,21 @@ var RequestsData = map[string]*models.AccountData{
 
 var ResponsesData = map[string]*models.AccountData{
 	"create": {
+		ID:             "ad27e265-9605-4b4b-a0e5-3003ea9cc4dc",
+		OrganisationID: "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c",
+		Type:           "accounts",
+		Version:        address.Of[int64](0),
+		Attributes: models.AccountAttributes{
+			AlternativeNames: []string{"Sam Holder"},
+			BankID:           "400300",
+			BankIDCode:       "GBDSC",
+			BaseCurrency:     "GBP",
+			Bic:              "NWBKGB22",
+			Country:          address.Of("GB"),
+			Name:             []string{"Samantha Holder"},
+		},
+	},
+	"fetch": {
 		ID:             "ad27e265-9605-4b4b-a0e5-3003ea9cc4dc",
 		OrganisationID: "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c",
 		Type:           "accounts",

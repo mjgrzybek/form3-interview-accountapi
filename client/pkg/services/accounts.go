@@ -57,8 +57,29 @@ func encode(data any) (*bytes.Buffer, error) {
 	return bytes.NewBuffer(body), nil
 }
 
-func (svc AccountsApiService) Fetch() error {
-	return nil
+func (svc AccountsApiService) Fetch(data *models.AccountData) (*models.AccountData, error) {
+	url, err := url.Parse(svc.path() + "/" + data.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	httpResponse, err := svc.HttpClient.Get(url.String())
+	if err != nil {
+		return nil, err
+	}
+
+	if httpResponse.StatusCode >= http.StatusBadRequest {
+		var errorResponse models.ErrorResponse
+		err = json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
+		return nil, err
+	}
+
+	var accountDataResponse models.AccountDataResponse
+	err = json.NewDecoder(httpResponse.Body).Decode(&accountDataResponse)
+	if err != nil {
+		return nil, err
+	}
+	return accountDataResponse.Data, nil
 }
 
 func (svc AccountsApiService) Delete(data *models.AccountData) error {

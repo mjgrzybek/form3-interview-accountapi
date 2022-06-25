@@ -22,6 +22,18 @@ func TestAccountApi_Create(t *testing.T) {
 	})
 }
 
+func TestAccountApi_Fetch(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		svc := client.NewAccountsApiService()
+
+		accountRequestData := RequestsData["fetch"]
+		accountResponseData, err := svc.Fetch(accountRequestData)
+
+		assert.Equal(t, ResponsesData["fetch"], accountResponseData)
+		assert.NoError(t, err)
+	})
+}
+
 func TestAccountApi_Delete(t *testing.T) {
 	t.Run("", func(t *testing.T) {
 		svc := client.NewAccountsApiService()
