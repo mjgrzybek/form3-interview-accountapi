@@ -47,6 +47,7 @@ func (svc AccountsApiService) Create(accountData *models.AccountData) (*models.A
 	return svc.handleResponse(httpResponse, err)
 }
 
+// just placeholders - not in scope of this assigment
 func validateCreate(*url.URL, *models.AccountData) error {
 	return nil
 }
