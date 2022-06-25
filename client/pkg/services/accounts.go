@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -28,7 +29,7 @@ func NewAccountsApiService() (*AccountsApiService, error) {
 	return svc, nil
 }
 
-func (svc AccountsApiService) Create(accountData *models.AccountData) (*models.AccountData, error) {
+func (svc AccountsApiService) Create(ctx context.Context, accountData *models.AccountData) (*models.AccountData, error) {
 	url := svc.ApiUrl
 	err := validateCreate(url, accountData)
 	if err != nil {
@@ -40,7 +41,13 @@ func (svc AccountsApiService) Create(accountData *models.AccountData) (*models.A
 		return nil, err
 	}
 
-	httpResponse, err := svc.HttpClient.Post(url.String(), "application/vnd.api+json", buffer)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url.String(), buffer)
+	req.Header.Set("Content-Type", "application/vnd.api+json")
+	if err != nil {
+		return nil, err
+	}
+
+	httpResponse, err := svc.HttpClient.Do(req)
 	defer httpResponse.Body.Close()
 	if err != nil {
 		return nil, err
@@ -49,7 +56,7 @@ func (svc AccountsApiService) Create(accountData *models.AccountData) (*models.A
 	return svc.handleResponse(httpResponse, err)
 }
 
-func (svc AccountsApiService) Fetch(data *models.AccountData) (*models.AccountData, error) {
+func (svc AccountsApiService) Fetch(ctx context.Context, data *models.AccountData) (*models.AccountData, error) {
 	url, err := url.Parse(svc.ApiUrl.String() + "/" + data.ID) // TODO: make it smarter
 	if err != nil {
 		return nil, err
@@ -60,7 +67,12 @@ func (svc AccountsApiService) Fetch(data *models.AccountData) (*models.AccountDa
 		return nil, err
 	}
 
-	httpResponse, err := svc.HttpClient.Get(url.String())
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url.String(), bytes.NewReader(nil))
+	if err != nil {
+		return nil, err
+	}
+
+	httpResponse, err := svc.HttpClient.Do(req)
 	defer httpResponse.Body.Close()
 	if err != nil {
 		return nil, err
@@ -69,7 +81,7 @@ func (svc AccountsApiService) Fetch(data *models.AccountData) (*models.AccountDa
 	return svc.handleResponse(httpResponse, err)
 }
 
-func (svc AccountsApiService) Delete(data *models.AccountData) error {
+func (svc AccountsApiService) Delete(ctx context.Context, data *models.AccountData) error {
 	url, err := url.Parse(svc.ApiUrl.String() + "/" + data.ID) // TODO: make it smarter
 	if err != nil {
 		return err
@@ -85,7 +97,7 @@ func (svc AccountsApiService) Delete(data *models.AccountData) error {
 		return err
 	}
 
-	req, err := http.NewRequest(http.MethodDelete, url.String(), bytes.NewReader(nil))
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, url.String(), bytes.NewReader(nil))
 	if err != nil {
 		return err
 	}

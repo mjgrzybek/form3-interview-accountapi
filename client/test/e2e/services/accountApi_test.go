@@ -3,6 +3,7 @@
 package services
 
 import (
+	"context"
 	"testing"
 
 	"github.com/google/uuid"
@@ -18,7 +19,7 @@ func TestAccountApi_Create(t *testing.T) {
 		assert.NoError(t, err)
 
 		accountRequestData := RequestsData["create"]
-		accountResponseData, err := svc.Create(accountRequestData)
+		accountResponseData, err := svc.Create(context.TODO(), accountRequestData)
 
 		assert.Equal(t, ResponsesData["create"], accountResponseData)
 		assert.NoError(t, err)
@@ -28,7 +29,7 @@ func TestAccountApi_Create(t *testing.T) {
 		assert.NoError(t, err)
 
 		accountRequestData := RequestsData["create"]
-		accountResponseData, err := svc.Create(accountRequestData)
+		accountResponseData, err := svc.Create(context.TODO(), accountRequestData)
 
 		assert.Nil(t, accountResponseData)
 		assert.EqualError(t, err, "Account cannot be created as it violates a duplicate constraint")
@@ -41,7 +42,7 @@ func TestAccountApi_Fetch(t *testing.T) {
 		assert.NoError(t, err)
 
 		accountRequestData := RequestsData["fetch"]
-		accountResponseData, err := svc.Fetch(accountRequestData)
+		accountResponseData, err := svc.Fetch(context.TODO(), accountRequestData)
 		assert.Equal(t, ResponsesData["fetch"], accountResponseData)
 		assert.NoError(t, err)
 	})
@@ -52,7 +53,7 @@ func TestAccountApi_Fetch(t *testing.T) {
 		accountRequestData := RequestsData["fetch"]
 		err = setRandomUuid(t, accountRequestData)
 
-		accountResponseData, err := svc.Fetch(accountRequestData)
+		accountResponseData, err := svc.Fetch(context.TODO(), accountRequestData)
 
 		assert.Nil(t, accountResponseData)
 		assert.EqualError(t, err, "record "+accountRequestData.ID+" does not exist")
@@ -74,7 +75,7 @@ func TestAccountApi_Delete(t *testing.T) {
 		assert.NoError(t, err)
 
 		accountRequestData := RequestsData["delete"]
-		err = svc.Delete(accountRequestData)
+		err = svc.Delete(context.TODO(), accountRequestData)
 		assert.NoError(t, err)
 	})
 }

@@ -1,5 +1,5 @@
 # TODO
-- [ ] http client with context
+- [x] http ~~client~~ requests with context
 - [x] input validation
 - [x] add `defer` where needed to close readers etc.
 # Testing
