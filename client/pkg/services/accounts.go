@@ -41,26 +41,12 @@ func (svc AccountsApiService) Create(accountData *models.AccountData) (*models.A
 	}
 
 	httpResponse, err := svc.HttpClient.Post(url.String(), "application/vnd.api+json", buffer)
+	defer httpResponse.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
 	return svc.handleResponse(httpResponse, err)
-}
-
-func (svc AccountsApiService) handleResponse(httpResponse *http.Response, err error) (*models.AccountData, error) {
-	if httpResponse.StatusCode >= http.StatusBadRequest {
-		return nil, svc.handleError(err, httpResponse)
-	}
-
-	var accountDataResponse models.AccountDataResponse
-	if httpResponse.Body != http.NoBody {
-		err = json.NewDecoder(httpResponse.Body).Decode(&accountDataResponse)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return accountDataResponse.Data, nil
 }
 
 func (svc AccountsApiService) Fetch(data *models.AccountData) (*models.AccountData, error) {
@@ -75,6 +61,7 @@ func (svc AccountsApiService) Fetch(data *models.AccountData) (*models.AccountDa
 	}
 
 	httpResponse, err := svc.HttpClient.Get(url.String())
+	defer httpResponse.Body.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -104,6 +91,7 @@ func (svc AccountsApiService) Delete(data *models.AccountData) error {
 	}
 
 	httpResponse, err := svc.HttpClient.Do(req)
+	defer httpResponse.Body.Close()
 	if err != nil {
 		return err
 	}
@@ -112,12 +100,19 @@ func (svc AccountsApiService) Delete(data *models.AccountData) error {
 	return err
 }
 
-func setParams(url *url.URL, data *models.AccountData) error {
-	if data.Version == nil {
-		return errors.New("data.Version cannot be nil")
+func (svc AccountsApiService) handleResponse(httpResponse *http.Response, err error) (*models.AccountData, error) {
+	if httpResponse.StatusCode >= http.StatusBadRequest {
+		return nil, svc.handleError(err, httpResponse)
 	}
-	utils.SetParam(url, "version", strconv.FormatInt(*data.Version, 10))
-	return nil
+
+	var accountDataResponse models.AccountDataResponse
+	if httpResponse.Body != http.NoBody {
+		err = json.NewDecoder(httpResponse.Body).Decode(&accountDataResponse)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return accountDataResponse.Data, nil
 }
 
 func (svc AccountsApiService) handleError(err error, httpResponse *http.Response) error {
@@ -128,4 +123,12 @@ func (svc AccountsApiService) handleError(err error, httpResponse *http.Response
 	}
 
 	return errors.New(errorResponse.ErrorMessage)
+}
+
+func setParams(url *url.URL, data *models.AccountData) error {
+	if data.Version == nil {
+		return errors.New("data.Version cannot be nil")
+	}
+	utils.SetParam(url, "version", strconv.FormatInt(*data.Version, 10))
+	return nil
 }

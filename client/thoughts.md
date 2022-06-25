@@ -1,7 +1,7 @@
 # TODO
 - [ ] http client with context
-- [ ] input validation
-- [ ] add `defer` where needed to close readers etc.
+- [x] input validation
+- [x] add `defer` where needed to close readers etc.
 # Testing
 ## unit
 - [ ] unit tests full coverage
