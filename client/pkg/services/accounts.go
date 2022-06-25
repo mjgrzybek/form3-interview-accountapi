@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	internal "github.com/mjgrzybek/form3-interview-accountapi/client/internal/client"
+	utils "github.com/mjgrzybek/form3-interview-accountapi/client/internal/utils"
 	"github.com/mjgrzybek/form3-interview-accountapi/client/pkg/models"
 )
 
@@ -34,7 +35,7 @@ func (svc AccountsApiService) Create(accountData *models.AccountData) (*models.A
 		return nil, err
 	}
 
-	buffer, err := encode(models.AccountDataRequest{Data: accountData})
+	buffer, err := utils.Encode(models.AccountDataRequest{Data: accountData})
 	if err != nil {
 		return nil, err
 	}
@@ -60,15 +61,6 @@ func (svc AccountsApiService) handleResponse(httpResponse *http.Response, err er
 		}
 	}
 	return accountDataResponse.Data, nil
-}
-
-func encode(data any) (*bytes.Buffer, error) {
-	body, err := json.Marshal(data)
-	if err != nil {
-		return nil, err
-	}
-
-	return bytes.NewBuffer(body), nil
 }
 
 func (svc AccountsApiService) Fetch(data *models.AccountData) (*models.AccountData, error) {
@@ -124,14 +116,8 @@ func setParams(url *url.URL, data *models.AccountData) error {
 	if data.Version == nil {
 		return errors.New("data.Version cannot be nil")
 	}
-	setParam(url, "version", strconv.FormatInt(*data.Version, 10))
+	utils.SetParam(url, "version", strconv.FormatInt(*data.Version, 10))
 	return nil
-}
-
-func setParam(url *url.URL, key, value string) {
-	values := url.Query()
-	values.Set(key, value)
-	url.RawQuery = values.Encode()
 }
 
 func (svc AccountsApiService) handleError(err error, httpResponse *http.Response) error {
