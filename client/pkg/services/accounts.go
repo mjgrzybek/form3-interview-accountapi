@@ -47,17 +47,6 @@ func (svc AccountsApiService) Create(accountData *models.AccountData) (*models.A
 	return svc.handleResponse(httpResponse, err)
 }
 
-// just placeholders - not in scope of this assigment
-func validateCreate(*url.URL, *models.AccountData) error {
-	return nil
-}
-func validateFetch(*url.URL) error {
-	return nil
-}
-func validateDelete(*url.URL, *models.AccountData) error {
-	return nil
-}
-
 func (svc AccountsApiService) handleResponse(httpResponse *http.Response, err error) (*models.AccountData, error) {
 	if httpResponse.StatusCode >= http.StatusBadRequest {
 		return nil, svc.handleError(err, httpResponse)
