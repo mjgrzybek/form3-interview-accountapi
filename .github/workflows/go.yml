@@ -25,3 +25,10 @@ jobs:
     - name: Test
       working-directory: client
       run: go test -v ./...
+
+    - name: Run golangci-lint
+      uses: golangci/golangci-lint-action@v3.2.0
+      with:
+          working-directory: client
+
+
