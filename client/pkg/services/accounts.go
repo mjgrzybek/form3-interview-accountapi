@@ -56,7 +56,7 @@ func (svc AccountsApiService) Create(ctx context.Context, accountData *models.Ac
 	}
 	defer httpResponse.Body.Close()
 
-	return svc.handleResponse(httpResponse, err)
+	return svc.handleResponse(httpResponse)
 }
 
 func (svc AccountsApiService) Fetch(ctx context.Context, data *models.AccountData) (*models.AccountData, error) {
@@ -81,7 +81,7 @@ func (svc AccountsApiService) Fetch(ctx context.Context, data *models.AccountDat
 	}
 	defer httpResponse.Body.Close()
 
-	return svc.handleResponse(httpResponse, err)
+	return svc.handleResponse(httpResponse)
 }
 
 func (svc AccountsApiService) Delete(ctx context.Context, data *models.AccountData) error {
@@ -111,18 +111,18 @@ func (svc AccountsApiService) Delete(ctx context.Context, data *models.AccountDa
 	}
 	defer httpResponse.Body.Close()
 
-	_, err = svc.handleResponse(httpResponse, err)
+	_, err = svc.handleResponse(httpResponse)
 	return err
 }
 
-func (svc AccountsApiService) handleResponse(httpResponse *http.Response, err error) (*models.AccountData, error) {
+func (svc AccountsApiService) handleResponse(httpResponse *http.Response) (*models.AccountData, error) {
 	if httpResponse.StatusCode >= http.StatusBadRequest {
-		return nil, svc.handleError(err, httpResponse)
+		return nil, svc.handleError(httpResponse)
 	}
 
 	var accountDataResponse models.AccountDataResponse
 	if httpResponse.Body != http.NoBody {
-		err = json.NewDecoder(httpResponse.Body).Decode(&accountDataResponse)
+		err := json.NewDecoder(httpResponse.Body).Decode(&accountDataResponse)
 		if err != nil {
 			return nil, err
 		}
@@ -130,9 +130,9 @@ func (svc AccountsApiService) handleResponse(httpResponse *http.Response, err er
 	return accountDataResponse.Data, nil
 }
 
-func (svc AccountsApiService) handleError(err error, httpResponse *http.Response) error {
+func (svc AccountsApiService) handleError(httpResponse *http.Response) error {
 	var errorResponse models.ErrorResponse
-	err = json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
+	err := json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
 	if err != nil {
 		return err
 	}
