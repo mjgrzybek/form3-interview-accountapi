@@ -30,8 +30,7 @@ func NewAccountsApiService() (*AccountsApiService, error) {
 }
 
 func (svc AccountsApiService) Create(ctx context.Context, accountData *models.AccountData) (*models.AccountData, error) {
-	url := svc.ApiUrl
-	err := validateCreate(url, accountData)
+	err := validateCreate(svc.ApiUrl, accountData)
 	if err != nil {
 		return nil, err
 	}
@@ -41,17 +40,17 @@ func (svc AccountsApiService) Create(ctx context.Context, accountData *models.Ac
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url.String(), buffer)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, svc.ApiUrl.String(), buffer)
 	req.Header.Set("Content-Type", "application/vnd.api+json")
 	if err != nil {
 		return nil, err
 	}
 
 	httpResponse, err := svc.HttpClient.Do(req)
-	defer httpResponse.Body.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer httpResponse.Body.Close()
 
 	return svc.handleResponse(httpResponse, err)
 }
@@ -73,10 +72,10 @@ func (svc AccountsApiService) Fetch(ctx context.Context, data *models.AccountDat
 	}
 
 	httpResponse, err := svc.HttpClient.Do(req)
-	defer httpResponse.Body.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer httpResponse.Body.Close()
 
 	return svc.handleResponse(httpResponse, err)
 }
@@ -103,10 +102,10 @@ func (svc AccountsApiService) Delete(ctx context.Context, data *models.AccountDa
 	}
 
 	httpResponse, err := svc.HttpClient.Do(req)
-	defer httpResponse.Body.Close()
 	if err != nil {
 		return err
 	}
+	defer httpResponse.Body.Close()
 
 	_, err = svc.handleResponse(httpResponse, err)
 	return err
