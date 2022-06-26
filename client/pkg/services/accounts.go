@@ -18,7 +18,11 @@ import (
 type AccountsApiService internal.Client
 
 func NewAccountsApiService() (*AccountsApiService, error) {
-	svc := (*AccountsApiService)(internal.NewClient())
+	client, err := internal.NewClient()
+	if err != nil {
+		return nil, err
+	}
+	svc := (*AccountsApiService)(client)
 
 	parsedUrl, err := url.Parse(svc.ApiUrl.String() + path.Join("/", "organisation", "accounts")) // TODO: make it smarter
 	if err != nil {

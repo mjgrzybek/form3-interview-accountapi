@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/mjgrzybek/form3-interview-accountapi/client/internal/address"
 	"github.com/mjgrzybek/form3-interview-accountapi/client/pkg/models"
 	"github.com/stretchr/testify/assert"
 
@@ -34,6 +35,17 @@ func TestAccountApi_Create(t *testing.T) {
 		assert.Nil(t, accountResponseData)
 		assert.EqualError(t, err, "Account cannot be created as it violates a duplicate constraint")
 	})
+	t.Run("fail creating entry because server-side request validation failed", func(t *testing.T) {
+		svc, err := client.NewAccountsApiService()
+		assert.NoError(t, err)
+
+		accountRequestData := RequestsData["create"]
+		accountRequestData.Attributes.Country = address.Of("This country doesn't exist")
+		accountResponseData, err := svc.Create(context.TODO(), accountRequestData)
+
+		assert.Nil(t, accountResponseData)
+		assert.EqualError(t, err, "validation failure list:\nvalidation failure list:\nvalidation failure list:\ncountry in body should match '^[A-Z]{2}$'")
+	})
 }
 
 func TestAccountApi_Fetch(t *testing.T) {
@@ -46,12 +58,12 @@ func TestAccountApi_Fetch(t *testing.T) {
 		assert.Equal(t, ResponsesData["fetch"], accountResponseData)
 		assert.NoError(t, err)
 	})
-	t.Run("fetch non-existing entry", func(t *testing.T) {
+	t.Run("fail fetching non-existing entry", func(t *testing.T) {
 		svc, err := client.NewAccountsApiService()
 		assert.NoError(t, err)
 
 		accountRequestData := RequestsData["fetch"]
-		err = setRandomUuid(t, accountRequestData)
+		setRandomUuid(t, accountRequestData)
 
 		accountResponseData, err := svc.Fetch(context.TODO(), accountRequestData)
 
@@ -60,17 +72,8 @@ func TestAccountApi_Fetch(t *testing.T) {
 	})
 }
 
-func setRandomUuid(t *testing.T, accountRequestData *models.AccountData) error {
-	uuid, err := uuid.NewUUID()
-	if err != nil {
-		t.Skipf("Unable to create new UUID %v", err)
-	}
-	accountRequestData.ID = uuid.String()
-	return err
-}
-
 func TestAccountApi_Delete(t *testing.T) {
-	t.Run("", func(t *testing.T) {
+	t.Run("delete existing account", func(t *testing.T) {
 		svc, err := client.NewAccountsApiService()
 		assert.NoError(t, err)
 
@@ -78,4 +81,22 @@ func TestAccountApi_Delete(t *testing.T) {
 		err = svc.Delete(context.TODO(), accountRequestData)
 		assert.NoError(t, err)
 	})
+	t.Run("fail deleting non-existing account", func(t *testing.T) {
+		svc, err := client.NewAccountsApiService()
+		assert.NoError(t, err)
+
+		accountRequestData := RequestsData["delete"]
+		setRandomUuid(t, accountRequestData)
+
+		err = svc.Delete(context.TODO(), accountRequestData)
+		assert.EqualError(t, err, "EOF")
+	})
+}
+
+func setRandomUuid(t *testing.T, accountRequestData *models.AccountData) {
+	uuid, err := uuid.NewUUID()
+	if err != nil {
+		t.Skipf("Unable to create new UUID %v", err)
+	}
+	accountRequestData.ID = uuid.String()
 }

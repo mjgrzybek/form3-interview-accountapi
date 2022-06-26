@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"log"
+	"errors"
 	"net/http"
 	"net/url"
 	"os"
@@ -14,23 +14,28 @@ type Client struct {
 	HttpClient http.Client
 }
 
-func NewClient() *Client {
-	return &Client{
-		ApiUrl:     getApiUrlFromEnv(),
-		HttpClient: http.Client{},
+func NewClient() (*Client, error) {
+	apiUrl, err := getApiUrlFromEnv()
+	if err != nil {
+		return nil, err
 	}
+
+	return &Client{
+		ApiUrl:     apiUrl,
+		HttpClient: http.Client{},
+	}, nil
 }
 
-func getApiUrlFromEnv() *url.URL {
+func getApiUrlFromEnv() (*url.URL, error) {
 	apiUrlEnvVarValue, ok := os.LookupEnv(ApiUrlEnvVarName)
 	if !ok {
-		log.Fatalf(`Environment variable "%s" not set`, ApiUrlEnvVarName)
+		return nil, errors.New("Environment variable \"" + ApiUrlEnvVarName + "\" not set")
 	}
 
 	apiUrl, err := url.Parse(apiUrlEnvVarValue)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return apiUrl
+	return apiUrl, nil
 }
