@@ -3,6 +3,9 @@ version: '3'
 services:
   form3-accountapi-client-test:
     image: form3-accountapi-client-test:latest
+    build:
+      context: client
+      dockerfile: build/Dockerfile-e2e-test
     restart: "no"
     depends_on:
       - accountapi
