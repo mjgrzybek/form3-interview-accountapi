@@ -3,6 +3,7 @@ test:
 	docker compose -f ../docker-compose.yml down --timeout=0 --volumes
 
 unit-test:
+	go vet ./...
 	go test ./...
 
 .PHONY: build-test-image test unit-test
