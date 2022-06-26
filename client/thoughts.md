@@ -6,6 +6,7 @@
 ## unit
 - [ ] unit tests full coverage
 ## e2e
+- [ ] packt.io ?
 ### basic
 - [ ] success scenarios
 - [ ] failing scenarios
