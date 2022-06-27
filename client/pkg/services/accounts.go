@@ -10,15 +10,15 @@ import (
 	"path"
 	"strconv"
 
-	internal "github.com/mjgrzybek/form3-interview-accountapi/client/internal/client"
+	client "github.com/mjgrzybek/form3-interview-accountapi/client/internal/client"
 	utils "github.com/mjgrzybek/form3-interview-accountapi/client/internal/utils"
 	"github.com/mjgrzybek/form3-interview-accountapi/client/pkg/models"
 )
 
-type AccountsApiService internal.Client
+type AccountsApiService client.Client
 
 func NewAccountsApiService() (*AccountsApiService, error) {
-	client, err := internal.NewClient()
+	client, err := client.NewClient()
 	if err != nil {
 		return nil, err
 	}
@@ -45,10 +45,10 @@ func (svc AccountsApiService) Create(ctx context.Context, accountData *models.Ac
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, svc.ApiUrl.String(), buffer)
-	req.Header.Set("Content-Type", "application/vnd.api+json")
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set(client.HeaderNameContentType, client.HeaderValueVendorJson)
 
 	httpResponse, err := svc.HttpClient.Do(req)
 	if err != nil {
@@ -74,6 +74,7 @@ func (svc AccountsApiService) Fetch(ctx context.Context, data *models.AccountDat
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set(client.HeaderNameAccept, "application/vnd.api+json")
 
 	httpResponse, err := svc.HttpClient.Do(req)
 	if err != nil {
