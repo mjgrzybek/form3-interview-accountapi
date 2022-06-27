@@ -4,6 +4,10 @@ package services
 
 import (
 	"context"
+	"errors"
+	"log"
+	"net/url"
+	"os"
 	"testing"
 
 	"github.com/google/uuid"
@@ -14,9 +18,35 @@ import (
 	client "github.com/mjgrzybek/form3-interview-accountapi/client/pkg/services"
 )
 
+var apiUrl *url.URL
+
+func init() {
+	url, err := getApiUrlFromEnv()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	apiUrl = url
+}
+
+func getApiUrlFromEnv() (*url.URL, error) {
+	const ApiUrlEnvVarName = "API_URL"
+
+	apiUrlEnvVarValue, ok := os.LookupEnv(ApiUrlEnvVarName)
+	if !ok {
+		return nil, errors.New("Environment variable \"" + ApiUrlEnvVarName + "\" not set")
+	}
+
+	apiUrl, err := url.Parse(apiUrlEnvVarValue)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiUrl, nil
+}
+
 func TestAccountApi_Create(t *testing.T) {
 	t.Run("create unique entry", func(t *testing.T) {
-		svc, err := client.NewAccountsApiService()
+		svc, err := client.NewAccountsApiService(apiUrl)
 		assert.NoError(t, err)
 
 		accountRequestData := RequestsData["create"]
@@ -26,7 +56,7 @@ func TestAccountApi_Create(t *testing.T) {
 		assert.NoError(t, err)
 	})
 	t.Run("create entry already existing", func(t *testing.T) {
-		svc, err := client.NewAccountsApiService()
+		svc, err := client.NewAccountsApiService(apiUrl)
 		assert.NoError(t, err)
 
 		accountRequestData := RequestsData["create"]
@@ -36,7 +66,7 @@ func TestAccountApi_Create(t *testing.T) {
 		assert.EqualError(t, err, "Account cannot be created as it violates a duplicate constraint")
 	})
 	t.Run("fail creating entry because server-side request validation failed", func(t *testing.T) {
-		svc, err := client.NewAccountsApiService()
+		svc, err := client.NewAccountsApiService(apiUrl)
 		assert.NoError(t, err)
 
 		accountRequestData := RequestsData["create"]
@@ -50,7 +80,7 @@ func TestAccountApi_Create(t *testing.T) {
 
 func TestAccountApi_Fetch(t *testing.T) {
 	t.Run("fetch existing entry", func(t *testing.T) {
-		svc, err := client.NewAccountsApiService()
+		svc, err := client.NewAccountsApiService(apiUrl)
 		assert.NoError(t, err)
 
 		accountRequestData := RequestsData["fetch"]
@@ -59,7 +89,7 @@ func TestAccountApi_Fetch(t *testing.T) {
 		assert.NoError(t, err)
 	})
 	t.Run("fail fetching non-existing entry", func(t *testing.T) {
-		svc, err := client.NewAccountsApiService()
+		svc, err := client.NewAccountsApiService(apiUrl)
 		assert.NoError(t, err)
 
 		accountRequestData := RequestsData["fetch"]
@@ -74,7 +104,7 @@ func TestAccountApi_Fetch(t *testing.T) {
 
 func TestAccountApi_Delete(t *testing.T) {
 	t.Run("delete existing account", func(t *testing.T) {
-		svc, err := client.NewAccountsApiService()
+		svc, err := client.NewAccountsApiService(apiUrl)
 		assert.NoError(t, err)
 
 		accountRequestData := RequestsData["delete"]
@@ -82,7 +112,7 @@ func TestAccountApi_Delete(t *testing.T) {
 		assert.NoError(t, err)
 	})
 	t.Run("fail deleting non-existing account", func(t *testing.T) {
-		svc, err := client.NewAccountsApiService()
+		svc, err := client.NewAccountsApiService(apiUrl)
 		assert.NoError(t, err)
 
 		accountRequestData := RequestsData["delete"]

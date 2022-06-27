@@ -16,11 +16,8 @@ import (
 
 type AccountsApiService client.Client
 
-func NewAccountsApiService() (*AccountsApiService, error) {
-	client, err := client.NewClient()
-	if err != nil {
-		return nil, err
-	}
+func NewAccountsApiService(apiUrl *url.URL) (*AccountsApiService, error) {
+	client := client.NewClient(apiUrl)
 	svc := (*AccountsApiService)(client)
 	svc.ApiUrl = utils.JoinPathUrl(*svc.ApiUrl, "organisation", "accounts")
 
