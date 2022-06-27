@@ -7,7 +7,6 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
-	"path"
 	"strconv"
 
 	client "github.com/mjgrzybek/form3-interview-accountapi/client/internal/client"
@@ -23,22 +22,12 @@ func NewAccountsApiService() (*AccountsApiService, error) {
 		return nil, err
 	}
 	svc := (*AccountsApiService)(client)
-
-	parsedUrl, err := url.Parse(svc.ApiUrl.String() + path.Join("/", "organisation", "accounts")) // TODO: make it smarter
-	if err != nil {
-		return nil, err
-	}
-	svc.ApiUrl = parsedUrl
+	svc.ApiUrl = utils.JoinPathUrl(*svc.ApiUrl, "organisation", "accounts")
 
 	return svc, nil
 }
 
 func (svc AccountsApiService) Create(ctx context.Context, accountData *models.AccountData) (*models.AccountData, error) {
-	err := validateCreate(svc.ApiUrl, accountData)
-	if err != nil {
-		return nil, err
-	}
-
 	buffer, err := utils.Encode(models.AccountDataRequest{Data: accountData})
 	if err != nil {
 		return nil, err
@@ -50,6 +39,11 @@ func (svc AccountsApiService) Create(ctx context.Context, accountData *models.Ac
 	}
 	req.Header.Set(client.HeaderNameContentType, client.HeaderValueVendorJson)
 
+	err = validateCreate(req)
+	if err != nil {
+		return nil, err
+	}
+
 	httpResponse, err := svc.HttpClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -60,21 +54,15 @@ func (svc AccountsApiService) Create(ctx context.Context, accountData *models.Ac
 }
 
 func (svc AccountsApiService) Fetch(ctx context.Context, data *models.AccountData) (*models.AccountData, error) {
-	url, err := url.Parse(svc.ApiUrl.String() + "/" + data.ID) // TODO: make it smarter
-	if err != nil {
-		return nil, err
-	}
-
-	err = validateFetch(url)
-	if err != nil {
-		return nil, err
-	}
+	url := utils.JoinPathUrl(*svc.ApiUrl, data.ID)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url.String(), bytes.NewReader(nil))
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set(client.HeaderNameAccept, "application/vnd.api+json")
+
+	validateFetch(req)
 
 	httpResponse, err := svc.HttpClient.Do(req)
 	if err != nil {
@@ -86,22 +74,19 @@ func (svc AccountsApiService) Fetch(ctx context.Context, data *models.AccountDat
 }
 
 func (svc AccountsApiService) Delete(ctx context.Context, data *models.AccountData) error {
-	url, err := url.Parse(svc.ApiUrl.String() + "/" + data.ID) // TODO: make it smarter
-	if err != nil {
-		return err
-	}
+	url := utils.JoinPathUrl(*svc.ApiUrl, data.ID)
 
-	err = setParams(url, data)
-	if err != nil {
-		return err
-	}
-
-	err = validateDelete(url, data)
+	err := setParams(url, data)
 	if err != nil {
 		return err
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, url.String(), bytes.NewReader(nil))
+	if err != nil {
+		return err
+	}
+
+	err = validateDelete(req)
 	if err != nil {
 		return err
 	}

@@ -109,3 +109,63 @@ func TestSetParam(t *testing.T) {
 		})
 	}
 }
+
+func TestJoinPathUrl(t *testing.T) {
+	type args struct {
+		url   url.URL
+		elems []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want *url.URL
+	}{
+		{
+			name: "no elems",
+			args: args{
+				url: func() url.URL {
+					parse, _ := url.Parse("http://foo.com")
+					return *parse
+				}(),
+				elems: []string{},
+			},
+			want: func() *url.URL {
+				parse, _ := url.Parse("http://foo.com")
+				return parse
+			}(),
+		},
+		{
+			name: "three elems",
+			args: args{
+				url: func() url.URL {
+					parse, _ := url.Parse("http://foo.com")
+					return *parse
+				}(),
+				elems: []string{"a", "b", "c"},
+			},
+			want: func() *url.URL {
+				parse, _ := url.Parse("http://foo.com/a/b/c")
+				return parse
+			}(),
+		},
+		{
+			name: "three elems with slashes",
+			args: args{
+				url: func() url.URL {
+					parse, _ := url.Parse("http://foo.com")
+					return *parse
+				}(),
+				elems: []string{"a", "///b////", "///c"},
+			},
+			want: func() *url.URL {
+				parse, _ := url.Parse("http://foo.com/a/b/c")
+				return parse
+			}(),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, JoinPathUrl(tt.args.url, tt.args.elems...), "JoinPathUrl(%v, %v)", tt.args.url, tt.args.elems)
+		})
+	}
+}

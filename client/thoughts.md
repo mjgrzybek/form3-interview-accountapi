@@ -7,6 +7,7 @@
 - [x] unit tests full coverage ~ 81%
 ## e2e
 - [ ] packt.io ?
+- [ ] mock server for error scenarios
 ### basic
 - [x] success scenarios
 - [x] failing scenarios
@@ -16,5 +17,5 @@ Client's side performance should not be an issue until proven.
 - [ ] learn about it and try to apply
 
 # Others
-- [ ] separate structs for different methods to avoid sending multiple empty fields
-  - check if it affects perf - less complicated code is preferred if perf is similar
+- [ ] ~~separate structs for different methods to avoid sending multiple empty fields~~
+  - ony `Create` request requires body

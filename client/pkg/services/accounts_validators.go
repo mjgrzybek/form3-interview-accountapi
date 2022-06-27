@@ -1,18 +1,16 @@
 package client
 
 import (
-	"net/url"
-
-	"github.com/mjgrzybek/form3-interview-accountapi/client/pkg/models"
+	"net/http"
 )
 
 // just placeholders - not in scope of this assigment
-func validateCreate(*url.URL, *models.AccountData) error {
+func validateCreate(*http.Request) error {
 	return nil
 }
-func validateFetch(*url.URL) error {
+func validateFetch(*http.Request) error {
 	return nil
 }
-func validateDelete(*url.URL, *models.AccountData) error {
+func validateDelete(*http.Request) error {
 	return nil
 }

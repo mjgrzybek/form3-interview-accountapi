@@ -15,7 +15,7 @@ type Client struct {
 }
 
 func NewClient() (*Client, error) {
-	apiUrl, err := getApiUrlFromEnv()
+	apiUrl, err := getApiUrlFromEnv() // TODO: switch to parameter instead of envvar
 	if err != nil {
 		return nil, err
 	}

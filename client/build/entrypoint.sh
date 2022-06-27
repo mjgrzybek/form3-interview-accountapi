@@ -16,4 +16,9 @@ waitForSvc() {
 waitForSvc "${SVC_NAME}"
 echo "${SVC_NAME} service is up - executing tests"
 
-go test -tags e2e ./...
+#go test -tags e2e -coverpkg=./... ./... -covermode=atomic
+go test \
+  -tags e2e \
+  -coverpkg ./... \
+  -covermode=atomic \
+  ./...
