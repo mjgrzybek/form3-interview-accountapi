@@ -9,32 +9,32 @@ import (
 	"net/url"
 	"strconv"
 
-	client "github.com/mjgrzybek/form3-interview-accountapi/client/internal/client"
 	utils "github.com/mjgrzybek/form3-interview-accountapi/client/internal/utils"
 	"github.com/mjgrzybek/form3-interview-accountapi/client/pkg/models"
 )
 
-type AccountsApiService client.Client
-
-func NewAccountsApiService(apiUrl *url.URL) (*AccountsApiService, error) {
-	client := client.NewClient(apiUrl)
-	svc := (*AccountsApiService)(client)
-	svc.ApiUrl = utils.JoinPathUrl(*svc.ApiUrl, "organisation", "accounts")
-
-	return svc, nil
+type accountsApiService struct {
+	*Client
+	Endpoint *url.URL
 }
 
-func (svc AccountsApiService) Create(ctx context.Context, accountData *models.AccountData) (*models.AccountData, error) {
+func newAccountsApiService(client *Client) *accountsApiService {
+	svc := &accountsApiService{Client: client}
+	svc.Endpoint = utils.JoinPathUrl(*svc.ApiUrl, "organisation", "accounts")
+	return svc
+}
+
+func (svc accountsApiService) Create(ctx context.Context, accountData *models.AccountData) (*models.AccountData, error) {
 	buffer, err := utils.Encode(models.AccountDataRequest{Data: accountData})
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, svc.ApiUrl.String(), buffer)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, svc.Endpoint.String(), buffer)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set(client.HeaderNameContentType, client.HeaderValueVendorJson)
+	req.Header.Set(HeaderNameContentType, HeaderValueVendorJson)
 
 	err = validateCreate(req)
 	if err != nil {
@@ -50,16 +50,19 @@ func (svc AccountsApiService) Create(ctx context.Context, accountData *models.Ac
 	return svc.handleResponse(httpResponse)
 }
 
-func (svc AccountsApiService) Fetch(ctx context.Context, data *models.AccountData) (*models.AccountData, error) {
-	url := utils.JoinPathUrl(*svc.ApiUrl, data.ID)
+func (svc accountsApiService) Fetch(ctx context.Context, data *models.AccountIdVersion) (*models.AccountData, error) {
+	url := utils.JoinPathUrl(*svc.Endpoint, data.ID)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url.String(), bytes.NewReader(nil))
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set(client.HeaderNameAccept, "application/vnd.api+json")
+	req.Header.Set(HeaderNameAccept, HeaderValueVendorJson)
 
-	validateFetch(req)
+	err = validateFetch(req)
+	if err != nil {
+		return nil, err
+	}
 
 	httpResponse, err := svc.HttpClient.Do(req)
 	if err != nil {
@@ -70,8 +73,8 @@ func (svc AccountsApiService) Fetch(ctx context.Context, data *models.AccountDat
 	return svc.handleResponse(httpResponse)
 }
 
-func (svc AccountsApiService) Delete(ctx context.Context, data *models.AccountData) error {
-	url := utils.JoinPathUrl(*svc.ApiUrl, data.ID)
+func (svc accountsApiService) Delete(ctx context.Context, data *models.AccountIdVersion) error {
+	url := utils.JoinPathUrl(*svc.Endpoint, data.ID)
 
 	err := setParams(url, data)
 	if err != nil {
@@ -98,7 +101,7 @@ func (svc AccountsApiService) Delete(ctx context.Context, data *models.AccountDa
 	return err
 }
 
-func (svc AccountsApiService) handleResponse(httpResponse *http.Response) (*models.AccountData, error) {
+func (svc accountsApiService) handleResponse(httpResponse *http.Response) (*models.AccountData, error) {
 	if httpResponse.StatusCode >= http.StatusBadRequest {
 		return nil, svc.handleError(httpResponse)
 	}
@@ -113,7 +116,7 @@ func (svc AccountsApiService) handleResponse(httpResponse *http.Response) (*mode
 	return accountDataResponse.Data, nil
 }
 
-func (svc AccountsApiService) handleError(httpResponse *http.Response) error {
+func (svc accountsApiService) handleError(httpResponse *http.Response) error {
 	var errorResponse models.ErrorResponse
 	err := json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
 	if err != nil {
@@ -123,7 +126,7 @@ func (svc AccountsApiService) handleError(httpResponse *http.Response) error {
 	return errors.New(errorResponse.ErrorMessage)
 }
 
-func setParams(url *url.URL, data *models.AccountData) error {
+func setParams(url *url.URL, data *models.AccountIdVersion) error {
 	if data.Version == nil {
 		return errors.New("version cannot be nil")
 	}

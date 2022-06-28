@@ -3,12 +3,20 @@ package models
 // Account represents an account in the form3 org section.
 // See https://api-docs.form3.tech/api.html#organisation-accounts for
 // more information about fields.
+type AccountId struct {
+	ID string `json:"id,omitempty"`
+}
+
+type AccountIdVersion struct {
+	AccountId
+	Version *int64 `json:"version,omitempty"`
+}
+
 type AccountData struct {
+	AccountIdVersion
 	Attributes     AccountAttributes `json:"attributes,omitempty"`
-	ID             string            `json:"id,omitempty"`
 	OrganisationID string            `json:"organisation_id,omitempty"`
 	Type           string            `json:"type,omitempty"`
-	Version        *int64            `json:"version,omitempty"`
 }
 
 type AccountAttributes struct {

@@ -12,10 +12,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/mjgrzybek/form3-interview-accountapi/client/internal/address"
+	"github.com/mjgrzybek/form3-interview-accountapi/client/pkg/client"
 	"github.com/mjgrzybek/form3-interview-accountapi/client/pkg/models"
 	"github.com/stretchr/testify/assert"
-
-	client "github.com/mjgrzybek/form3-interview-accountapi/client/pkg/services"
 )
 
 var apiUrl *url.URL
@@ -46,32 +45,26 @@ func getApiUrlFromEnv() (*url.URL, error) {
 
 func TestAccountApi_Create(t *testing.T) {
 	t.Run("create unique entry", func(t *testing.T) {
-		svc, err := client.NewAccountsApiService(apiUrl)
-		assert.NoError(t, err)
+		client := client.NewClient(apiUrl)
 
-		accountRequestData := RequestsData["create"]
-		accountResponseData, err := svc.Create(context.TODO(), accountRequestData)
+		accountResponseData, err := client.AccountApi.Create(context.TODO(), CreateRequestsData)
 
-		assert.Equal(t, ResponsesData["create"], accountResponseData)
+		assert.Equal(t, CreateResponseData, accountResponseData)
 		assert.NoError(t, err)
 	})
 	t.Run("create entry already existing", func(t *testing.T) {
-		svc, err := client.NewAccountsApiService(apiUrl)
-		assert.NoError(t, err)
+		client := client.NewClient(apiUrl)
 
-		accountRequestData := RequestsData["create"]
-		accountResponseData, err := svc.Create(context.TODO(), accountRequestData)
+		accountResponseData, err := client.AccountApi.Create(context.TODO(), CreateResponseData)
 
 		assert.Nil(t, accountResponseData)
 		assert.EqualError(t, err, "Account cannot be created as it violates a duplicate constraint")
 	})
 	t.Run("fail creating entry because server-side request validation failed", func(t *testing.T) {
-		svc, err := client.NewAccountsApiService(apiUrl)
-		assert.NoError(t, err)
+		client := client.NewClient(apiUrl)
 
-		accountRequestData := RequestsData["create"]
-		accountRequestData.Attributes.Country = address.Of("This country doesn't exist")
-		accountResponseData, err := svc.Create(context.TODO(), accountRequestData)
+		CreateRequestsData.Attributes.Country = address.Of("This country doesn't exist")
+		accountResponseData, err := client.AccountApi.Create(context.TODO(), CreateRequestsData)
 
 		assert.Nil(t, accountResponseData)
 		assert.EqualError(t, err, "validation failure list:\nvalidation failure list:\nvalidation failure list:\ncountry in body should match '^[A-Z]{2}$'")
@@ -80,50 +73,43 @@ func TestAccountApi_Create(t *testing.T) {
 
 func TestAccountApi_Fetch(t *testing.T) {
 	t.Run("fetch existing entry", func(t *testing.T) {
-		svc, err := client.NewAccountsApiService(apiUrl)
-		assert.NoError(t, err)
+		client := client.NewClient(apiUrl)
 
-		accountRequestData := RequestsData["fetch"]
-		accountResponseData, err := svc.Fetch(context.TODO(), accountRequestData)
-		assert.Equal(t, ResponsesData["fetch"], accountResponseData)
+		accountResponseData, err := client.AccountApi.Fetch(context.TODO(), FetchRequestsData)
+		assert.Equal(t, FetchResponseData, accountResponseData)
 		assert.NoError(t, err)
 	})
 	t.Run("fail fetching non-existing entry", func(t *testing.T) {
-		svc, err := client.NewAccountsApiService(apiUrl)
-		assert.NoError(t, err)
+		client := client.NewClient(apiUrl)
 
-		accountRequestData := RequestsData["fetch"]
-		setRandomUuid(t, accountRequestData)
+		setRandomUuid(t, FetchRequestsData)
 
-		accountResponseData, err := svc.Fetch(context.TODO(), accountRequestData)
+		accountResponseData, err := client.AccountApi.Fetch(context.TODO(), FetchRequestsData)
 
 		assert.Nil(t, accountResponseData)
-		assert.EqualError(t, err, "record "+accountRequestData.ID+" does not exist")
+		assert.EqualError(t, err, "record "+FetchRequestsData.ID+" does not exist")
 	})
 }
 
 func TestAccountApi_Delete(t *testing.T) {
 	t.Run("delete existing account", func(t *testing.T) {
-		svc, err := client.NewAccountsApiService(apiUrl)
-		assert.NoError(t, err)
+		client := client.NewClient(apiUrl)
 
-		accountRequestData := RequestsData["delete"]
-		err = svc.Delete(context.TODO(), accountRequestData)
+		err := client.AccountApi.Delete(context.TODO(), DeleteRequestData)
+
 		assert.NoError(t, err)
 	})
 	t.Run("fail deleting non-existing account", func(t *testing.T) {
-		svc, err := client.NewAccountsApiService(apiUrl)
-		assert.NoError(t, err)
+		client := client.NewClient(apiUrl)
 
-		accountRequestData := RequestsData["delete"]
-		setRandomUuid(t, accountRequestData)
+		setRandomUuid(t, DeleteRequestData)
 
-		err = svc.Delete(context.TODO(), accountRequestData)
+		err := client.AccountApi.Delete(context.TODO(), DeleteRequestData)
 		assert.EqualError(t, err, "EOF")
 	})
 }
 
-func setRandomUuid(t *testing.T, accountRequestData *models.AccountData) {
+func setRandomUuid(t *testing.T, accountRequestData *models.AccountIdVersion) {
 	uuid, err := uuid.NewUUID()
 	if err != nil {
 		t.Skipf("Unable to create new UUID %v", err)

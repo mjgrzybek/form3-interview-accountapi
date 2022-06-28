@@ -1,4 +1,4 @@
-package internal
+package client
 
 const (
 	HeaderNameContentType = "Content-Type"
