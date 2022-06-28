@@ -1,6 +1,6 @@
 //go:build e2e
 
-package services
+package client
 
 import (
 	"context"

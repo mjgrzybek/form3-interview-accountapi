@@ -1,6 +1,6 @@
 //go:build e2e
 
-package services
+package client
 
 import (
 	"github.com/mjgrzybek/form3-interview-accountapi/client/internal/address"
