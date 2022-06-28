@@ -1,3 +1,13 @@
+# Design decisions
+- `Client` holds http client
+- `AccountApi` is a field in `Client`, it uses `Client`'s http client and `ApiUrl`
+- Requests timeout is supported and should be used as `context`
+- Github Actions are used for CI
+
+# Trade-offs
+- tests limited to capabilities of provided server
+- some possible paths to errors are not covered with tests (coverage = 84%)
+
 # How to test
 ## On github
 Tests are executed as a [github action](https://github.com/mjgrzybek/form3-interview-accountapi/actions/workflows/tests.yml) on every push.
