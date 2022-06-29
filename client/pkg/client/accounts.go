@@ -21,7 +21,7 @@ type accountsApiService struct {
 
 func newAccountsApiService(client *Client) *accountsApiService {
 	svc := &accountsApiService{Client: client}
-	svc.Endpoint = utils.JoinPathUrl(*svc.ApiUrl, "organisation", "accounts")
+	svc.Endpoint = utils.JoinPathUrl(*svc.apiUrl, "organisation", "accounts")
 	return svc
 }
 
@@ -42,7 +42,7 @@ func (svc accountsApiService) Create(ctx context.Context, accountData *models.Ac
 		return nil, err
 	}
 
-	httpResponse, err := svc.HttpClient.Do(req)
+	httpResponse, err := svc.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (svc accountsApiService) Fetch(ctx context.Context, data *models.AccountIdV
 		return nil, err
 	}
 
-	httpResponse, err := svc.HttpClient.Do(req)
+	httpResponse, err := svc.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (svc accountsApiService) Delete(ctx context.Context, data *models.AccountId
 		return err
 	}
 
-	httpResponse, err := svc.HttpClient.Do(req)
+	httpResponse, err := svc.httpClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -116,6 +116,7 @@ func (svc accountsApiService) handleResponse(httpResponse *http.Response) (*mode
 		return svc.handleServerError(httpResponse)
 	}
 
+	//nolint
 	return nil, errors.New(fmt.Sprintf("Unable to interpret httpResponse: %+v", httpResponse))
 }
 

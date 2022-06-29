@@ -6,20 +6,20 @@ import (
 )
 
 type Client struct {
-	ApiUrl     *url.URL
-	HttpClient *http.Client
+	apiUrl     *url.URL
+	httpClient *http.Client
 
 	AccountApi *accountsApiService
 }
 
 func (c Client) endpoint() *url.URL {
-	return c.ApiUrl
+	return c.apiUrl
 }
 
 func NewClient(apiUrl *url.URL) *Client {
 	c := &Client{
-		ApiUrl:     apiUrl,
-		HttpClient: &http.Client{},
+		apiUrl:     apiUrl,
+		httpClient: &http.Client{},
 	}
 	c.AccountApi = newAccountsApiService(c)
 

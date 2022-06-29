@@ -38,8 +38,8 @@ func TestClient_endpoint(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := Client{
-				ApiUrl:     tt.fields.ApiUrl,
-				HttpClient: tt.fields.HttpClient,
+				apiUrl:     tt.fields.ApiUrl,
+				httpClient: tt.fields.HttpClient,
 				AccountApi: tt.fields.AccountApi,
 			}
 			if got := c.endpoint(); !reflect.DeepEqual(got, tt.want) {
