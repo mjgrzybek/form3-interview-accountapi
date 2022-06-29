@@ -103,22 +103,16 @@ func (svc accountsApiService) Delete(ctx context.Context, data *models.AccountId
 }
 
 func (svc accountsApiService) handleResponse(httpResponse *http.Response) (*models.AccountData, error) {
-	if httpResponse.StatusCode < http.StatusOK {
+	switch code := httpResponse.StatusCode; {
+	case code < http.StatusOK:
 		return svc.handleInformation(httpResponse)
-	}
-
-	if httpResponse.StatusCode >= http.StatusOK && httpResponse.StatusCode < http.StatusMultipleChoices {
+	case code >= http.StatusOK && code < http.StatusMultipleChoices:
 		return svc.handleSuccess(httpResponse)
-	}
-
-	if httpResponse.StatusCode >= http.StatusMultipleChoices && httpResponse.StatusCode < http.StatusBadRequest {
+	case code >= http.StatusMultipleChoices && code < http.StatusBadRequest:
 		return svc.handleRedirection(httpResponse)
-	}
-
-	if httpResponse.StatusCode >= http.StatusBadRequest && httpResponse.StatusCode < http.StatusInternalServerError {
+	case code >= http.StatusBadRequest && code < http.StatusInternalServerError:
 		return svc.handleClientError(httpResponse)
-	}
-	if httpResponse.StatusCode >= http.StatusInternalServerError {
+	case code >= http.StatusInternalServerError && code <= http.StatusNetworkAuthenticationRequired:
 		return svc.handleServerError(httpResponse)
 	}
 
