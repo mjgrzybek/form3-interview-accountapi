@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -102,10 +103,37 @@ func (svc accountsApiService) Delete(ctx context.Context, data *models.AccountId
 }
 
 func (svc accountsApiService) handleResponse(httpResponse *http.Response) (*models.AccountData, error) {
-	if httpResponse.StatusCode >= http.StatusBadRequest {
-		return nil, svc.handleError(httpResponse)
+	if httpResponse.StatusCode < http.StatusOK {
+		return svc.handleInformation(httpResponse)
 	}
 
+	if httpResponse.StatusCode >= http.StatusOK && httpResponse.StatusCode < http.StatusMultipleChoices {
+		return svc.handleSuccess(httpResponse)
+	}
+
+	if httpResponse.StatusCode >= http.StatusMultipleChoices && httpResponse.StatusCode < http.StatusBadRequest {
+		return svc.handleRedirection(httpResponse)
+	}
+
+	if httpResponse.StatusCode >= http.StatusBadRequest && httpResponse.StatusCode < http.StatusInternalServerError {
+		return svc.handleClientError(httpResponse)
+	}
+	if httpResponse.StatusCode >= http.StatusInternalServerError {
+		return svc.handleServerError(httpResponse)
+	}
+
+	return nil, errors.New(fmt.Sprintf("Unable to interpret httpResponse: %+v", httpResponse))
+}
+
+func (svc accountsApiService) handleGeneric(httpResponse *http.Response) error {
+	return errors.New(httpResponse.Status)
+}
+
+func (svc accountsApiService) handleInformation(httpResponse *http.Response) (*models.AccountData, error) {
+	return nil, svc.handleGeneric(httpResponse)
+}
+
+func (svc accountsApiService) handleSuccess(httpResponse *http.Response) (*models.AccountData, error) {
 	var accountDataResponse models.AccountDataResponse
 	if httpResponse.Body != http.NoBody {
 		err := json.NewDecoder(httpResponse.Body).Decode(&accountDataResponse)
@@ -115,15 +143,22 @@ func (svc accountsApiService) handleResponse(httpResponse *http.Response) (*mode
 	}
 	return accountDataResponse.Data, nil
 }
+func (svc accountsApiService) handleRedirection(httpResponse *http.Response) (*models.AccountData, error) {
+	return nil, svc.handleGeneric(httpResponse)
+}
 
-func (svc accountsApiService) handleError(httpResponse *http.Response) error {
+func (svc accountsApiService) handleClientError(httpResponse *http.Response) (*models.AccountData, error) {
 	var errorResponse models.ErrorResponse
 	err := json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return errors.New(errorResponse.ErrorMessage)
+	return nil, errors.New(errorResponse.ErrorMessage)
+}
+
+func (svc accountsApiService) handleServerError(httpResponse *http.Response) (*models.AccountData, error) {
+	return nil, svc.handleGeneric(httpResponse)
 }
 
 func setParams(url *url.URL, data *models.AccountIdVersion) error {
