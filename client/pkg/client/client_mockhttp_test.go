@@ -10,7 +10,6 @@ import (
 	"github.com/jarcoal/httpmock"
 	"github.com/mjgrzybek/form3-interview-accountapi/client/internal/address"
 	utils "github.com/mjgrzybek/form3-interview-accountapi/client/internal/utils"
-	"github.com/mjgrzybek/form3-interview-accountapi/client/pkg/client"
 	"github.com/mjgrzybek/form3-interview-accountapi/client/pkg/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -26,7 +25,8 @@ func TestRequestTimeout(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
-	endpoint := utils.JoinPathUrl(*apiUrlForTests, "organisation", "accounts", FetchRequestsData.ID).String()
+	const id = "id"
+	endpoint := utils.JoinPathUrl(*apiUrlForTests, "organisation", "accounts", id).String()
 
 	httpmock.RegisterResponder("GET", endpoint,
 		func(req *http.Request) (*http.Response, error) {
@@ -36,11 +36,14 @@ func TestRequestTimeout(t *testing.T) {
 	)
 
 	t.Run("cancel request", func(t *testing.T) {
-		client := client.NewClient(apiUrlForTests)
+		client := NewClient(apiUrlForTests)
 
 		ctx, cancelFunc := context.WithDeadline(context.Background(), time.Now().Add(2*time.Second))
 		defer cancelFunc()
-		accountResponseData, err := client.AccountApi.Fetch(ctx, FetchRequestsData)
+		accountResponseData, err := client.AccountApi.Fetch(ctx, &models.AccountIdVersion{
+			AccountId: models.AccountId{ID: id},
+			Version:   address.Of[int64](0),
+		})
 
 		assert.Nil(t, accountResponseData)
 		assert.ErrorContains(t, err, "context deadline exceeded")
@@ -60,7 +63,7 @@ func TestClientHandlingResponseCodes(t *testing.T) {
 		httpmock.RegisterResponder("GET", createUrl(acccountId),
 			httpmock.NewStringResponder(0, ``))
 
-		client := client.NewClient(apiUrlForTests)
+		client := NewClient(apiUrlForTests)
 		_, err := client.AccountApi.Fetch(context.TODO(), &models.AccountIdVersion{
 			AccountId: models.AccountId{ID: acccountId},
 			Version:   address.Of[int64](0),
@@ -72,7 +75,7 @@ func TestClientHandlingResponseCodes(t *testing.T) {
 		httpmock.RegisterResponder("GET", createUrl(acccountId),
 			httpmock.NewStringResponder(http.StatusProcessing, ``))
 
-		client := client.NewClient(apiUrlForTests)
+		client := NewClient(apiUrlForTests)
 		_, err := client.AccountApi.Fetch(context.TODO(), &models.AccountIdVersion{
 			AccountId: models.AccountId{ID: acccountId},
 			Version:   address.Of[int64](0),
@@ -84,7 +87,7 @@ func TestClientHandlingResponseCodes(t *testing.T) {
 		httpmock.RegisterResponder("GET", createUrl(acccountId),
 			httpmock.NewStringResponder(http.StatusOK, `{}`))
 
-		client := client.NewClient(apiUrlForTests)
+		client := NewClient(apiUrlForTests)
 		_, err := client.AccountApi.Fetch(context.TODO(), &models.AccountIdVersion{
 			AccountId: models.AccountId{ID: acccountId},
 			Version:   address.Of[int64](0),
@@ -96,7 +99,7 @@ func TestClientHandlingResponseCodes(t *testing.T) {
 		httpmock.RegisterResponder("GET", createUrl(acccountId),
 			httpmock.NewStringResponder(http.StatusMovedPermanently, ``))
 
-		client := client.NewClient(apiUrlForTests)
+		client := NewClient(apiUrlForTests)
 		_, err := client.AccountApi.Fetch(context.TODO(), &models.AccountIdVersion{
 			AccountId: models.AccountId{ID: acccountId},
 			Version:   address.Of[int64](0),
@@ -108,7 +111,7 @@ func TestClientHandlingResponseCodes(t *testing.T) {
 		httpmock.RegisterResponder("GET", createUrl(acccountId),
 			httpmock.NewStringResponder(http.StatusGone, `{"error_message":"gone"}`))
 
-		client := client.NewClient(apiUrlForTests)
+		client := NewClient(apiUrlForTests)
 		_, err := client.AccountApi.Fetch(context.TODO(), &models.AccountIdVersion{
 			AccountId: models.AccountId{ID: acccountId},
 			Version:   address.Of[int64](0),
@@ -120,7 +123,7 @@ func TestClientHandlingResponseCodes(t *testing.T) {
 		httpmock.RegisterResponder("GET", createUrl(acccountId),
 			httpmock.NewStringResponder(http.StatusServiceUnavailable, ``))
 
-		client := client.NewClient(apiUrlForTests)
+		client := NewClient(apiUrlForTests)
 		_, err := client.AccountApi.Fetch(context.TODO(), &models.AccountIdVersion{
 			AccountId: models.AccountId{ID: acccountId},
 			Version:   address.Of[int64](0),
@@ -132,7 +135,7 @@ func TestClientHandlingResponseCodes(t *testing.T) {
 		httpmock.RegisterResponder("GET", createUrl(acccountId),
 			httpmock.NewStringResponder(1000, ``))
 
-		client := client.NewClient(apiUrlForTests)
+		client := NewClient(apiUrlForTests)
 		_, err := client.AccountApi.Fetch(context.TODO(), &models.AccountIdVersion{
 			AccountId: models.AccountId{ID: acccountId},
 			Version:   address.Of[int64](0),

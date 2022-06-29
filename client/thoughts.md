@@ -7,7 +7,7 @@
 - [x] unit tests full coverage ~ 84%
 ## e2e
 - [ ] packt.io ?
-- [ ] mock in-memory server for error scenarios
+- [x] mock in-memory server for error scenarios
 ### basic
 - [x] success scenarios
 - [x] failing scenarios

@@ -6,7 +6,7 @@
 
 # Trade-offs
 - e2e tests limited to capabilities of provided server
-- `mockhttp` is used to mock non-standard (200, 404, ...) error codes
+- `mockhttp` is used to mock non-standard http error codes (102, 410, ...)
 - some possible paths to errors are not covered with tests (coverage = 84%)
 
 # How to test
