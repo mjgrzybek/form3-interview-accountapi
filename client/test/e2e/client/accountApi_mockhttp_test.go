@@ -9,7 +9,7 @@ import (
 
 	"github.com/jarcoal/httpmock"
 	"github.com/mjgrzybek/form3-interview-accountapi/client/internal/address"
-	internal "github.com/mjgrzybek/form3-interview-accountapi/client/internal/utils"
+	utils "github.com/mjgrzybek/form3-interview-accountapi/client/internal/utils"
 	"github.com/mjgrzybek/form3-interview-accountapi/client/pkg/client"
 	"github.com/mjgrzybek/form3-interview-accountapi/client/pkg/models"
 	"github.com/stretchr/testify/assert"
@@ -26,7 +26,7 @@ func TestRequestTimeout(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
-	endpoint := internal.JoinPathUrl(*apiUrlForTests, "organisation", "accounts", FetchRequestsData.ID).String()
+	endpoint := utils.JoinPathUrl(*apiUrlForTests, "organisation", "accounts", FetchRequestsData.ID).String()
 
 	httpmock.RegisterResponder("GET", endpoint,
 		func(req *http.Request) (*http.Response, error) {
@@ -52,7 +52,7 @@ func TestClientHandlingResponseCodes(t *testing.T) {
 	defer httpmock.DeactivateAndReset()
 
 	createUrl := func(accountId string) string {
-		return internal.JoinPathUrl(*apiUrlForTests, "organisation", "accounts", accountId).String()
+		return utils.JoinPathUrl(*apiUrlForTests, "organisation", "accounts", accountId).String()
 	}
 
 	t.Run("status code 0 handling", func(t *testing.T) {
