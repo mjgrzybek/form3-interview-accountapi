@@ -77,7 +77,7 @@ func (svc accountsApiService) Fetch(ctx context.Context, data *models.AccountIdV
 func (svc accountsApiService) Delete(ctx context.Context, data *models.AccountIdVersion) error {
 	url := utils.JoinPathUrl(*svc.Endpoint, data.ID)
 
-	err := setParams(url, data)
+	err := setDeleteParams(url, data)
 	if err != nil {
 		return err
 	}
@@ -156,7 +156,7 @@ func (svc accountsApiService) handleServerError(httpResponse *http.Response) (*m
 	return nil, svc.handleGeneric(httpResponse)
 }
 
-func setParams(url *url.URL, data *models.AccountIdVersion) error {
+func setDeleteParams(url *url.URL, data *models.AccountIdVersion) error {
 	if data.Version == nil {
 		return errors.New("version cannot be nil")
 	}
